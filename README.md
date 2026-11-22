@@ -7,12 +7,9 @@
     "Microservicios" : [
         "Usuarios" : [
             "Base de Datos"    : "Laragon",
-            "Sistema Paquetes" : [
-                "Modelo",
-                "Servicio",
-                "Repositorio",
-                "Controlador"
-            ]
+            "Sistema Paquetes" : "Usual",
+            "Puerto " : 8082,
+            "Swagger" : true
         ]
     ]
 
