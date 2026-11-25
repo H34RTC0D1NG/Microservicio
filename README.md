@@ -195,5 +195,3 @@ La firma ya está configurada en `app/build.gradle.kts` (`signingConfigs`), y le
 | Algoritmo | RSA 2048, validez 10.000 días |
 | Configuración | `PagoFlex/keystore.properties` y `signingConfigs` en `app/build.gradle.kts` |
 | APK | `app/build/outputs/apk/release/app-release.apk` |
-
-_Pegar aquí la captura del APK firmado generado._
