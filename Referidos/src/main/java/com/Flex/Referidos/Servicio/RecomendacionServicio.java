@@ -2,11 +2,9 @@ package com.Flex.Referidos.Servicio;
 
 import com.Flex.Referidos.Repositorio.RecomendacionRepositorio;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.beans.factory.annotation.Value;
 import com.Flex.Referidos.Modelo.Recomendacion;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,27 +17,22 @@ public class RecomendacionServicio {
     );
 
     private final RecomendacionRepositorio Repositorio;
-    private final RestClient Usuarios;
 
-    public RecomendacionServicio(
-        RecomendacionRepositorio Repositorio, RestClient.Builder Builder,
-        @Value("${servicios.usurios.url}") String UrlUsuarios) {
-            this.Repositorio = Repositorio;
-            this.Usuarios = Builder.baseUrl(UrlUsuarios).build();
-        }
+    public RecomendacionServicio(RecomendacionRepositorio Repositorio) {
+        this.Repositorio = Repositorio;
+    }
 
-    private void ValidarUsuario(Long Usuario_ID) {
-        try {
-            Usuarios.get().uri("/Api/Usuarios/{ID}", Usuario_ID).retrieve().toBodilessEntity();
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La Persona " + Usuario_ID + " No Existe");
-        } catch (RestClientException e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No Se Pudo Contactar a Usuarios [Puerto : 8081]");
+    private String EstadoValido(String Valor) {
+        for (String E : ESTADOS) {
+            if (E.equalsIgnoreCase(Valor)) {
+                return E;
+            }
         }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estado No Valido : " + Valor);
     }
 
     public List <Recomendacion> Listar(Long Usuario_ID) {
-        return Usuario_ID == null ? Repositorio.findAllByOrderByIdDesc() : Repositorio.findByUsuario_IDOrderIdDesc(Usuario_ID);
+        return Usuario_ID == null ? Repositorio.findAllByOrderByIdDesc() : Repositorio.findByUsuario_IDOrderByIdDesc(Usuario_ID);
     }
 
     public Recomendacion Obtener(Long ID) {
@@ -51,13 +44,14 @@ public class RecomendacionServicio {
 
     public Recomendacion Crear(Long Usuario_ID, String Organizacion, String Rubro, String Comuna, String Contacto, boolean Autoriza) {
         String Telefono = Contacto == null ? "" : Contacto.trim();
-        if (!Telefono.isEmpty() && !Autoriza) {
+        if (Usuario_ID == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta La Persona Que Recomienda");
+        } if (!Telefono.isEmpty() && !Autoriza) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La Persona Debe Autorizar Que La Contactemos");
         } if (Repositorio.countByUsuario_ID(Usuario_ID) >= MAXIMO) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya Hiciste La Cantidad de " + MAXIMO + " Recomendaciones y ese es el Limite");
         } 
 
-        ValidarUsuario(Usuario_ID);
         Recomendacion R = new Recomendacion();
         R.setUsuario_ID(Usuario_ID);
         R.setOrganizacion(Organizacion.trim());
@@ -72,10 +66,9 @@ public class RecomendacionServicio {
 
     }
 
-    public Recomendacion CambiarEstado(Long ID, String Estado) {
-        if (!ESTADOS.contains(Estado)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estado No Valido : " + Estado);
-        } Recomendacion R = Obtener(ID);
+    public Recomendacion CambiarEstado(Long ID, String Valor) {
+        String Estado = EstadoValido(Valor);
+        Recomendacion R = Obtener(ID);
         R.setEstado(Estado);
         return Repositorio.save(R);
     }

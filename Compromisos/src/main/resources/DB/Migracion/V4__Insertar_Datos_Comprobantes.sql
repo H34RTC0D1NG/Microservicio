@@ -10,7 +10,7 @@ Insert Into Comprobantes (
 
 ) , (
 
-    2, 'C_5002', 4, 'PF-1004', 2, 'Caja los Andes', 'Crédito de Consumo', 89900,
+    2, 'C-5002', 4, 'PF-1004', 2, 'Caja los Andes', 'Crédito de Consumo', 89900,
     Curdate() - Interval 25 Day, '10:15', 'Transferencia', 'Presencial', 0
 
 );

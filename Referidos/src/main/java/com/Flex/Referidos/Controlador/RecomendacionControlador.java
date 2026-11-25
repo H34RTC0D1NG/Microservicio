@@ -29,7 +29,7 @@ public class RecomendacionControlador {
         return Servicio.Listar(Usuario_ID);
     }
 
-    @GetMapping("/Obtener")
+    @GetMapping("/Obtener/{ID}")
     public Recomendacion Obtener(@PathVariable Long ID) {
         return Servicio.Obtener(ID);
     } 
